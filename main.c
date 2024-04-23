@@ -1,53 +1,35 @@
-#include "libft/libft.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
+#include "pipex.h"
 
-typedef struct s_cmd{
-	char			*name;
-	char			**args;
-} t_list;
-
-t_list	*init_commands(int argc, char **argv);
-void	get_args(t_list *cmd, char *argv);
-
-int	main(int argc, char **argv, char **env)
+int	main(int argc, char **argv, char **envp)
 {
-	t_list	*arr;
+	t_node	*arr;
+	char	**path;
 	int		pid;
 	int pipedes[2];
+	int	i, j;
 
 	arr = init_commands(argc - 1, argv + 1);
+	path = get_path(envp);
 	if (!arr)
 		return (1);
-	
+	i = 0;
+	// while (i < argc - 1)
+	// {
+	// 	printf("name = %s\n", arr[i].name);
+	// 	j = 0;
+	// 	while ((arr[i]).args[j])
+	// 	{
+	// 		printf("%s\n", arr[i].args[j]);
+	// 		j++;
+	// 	}
+	// 	i++;
+	// }
+	while (*path)
+	{
+		printf("%s\n", *path);
+		path++;
+	}
 	return (0);
-}
-
-t_list	*init_commands(int argc, char **argv)
-{
-	t_list	*rval;
-	int	i;
-
-	i = -1;
-	rval = (t_list *)malloc(argc * sizeof(t_list));
-	if (!rval)
-		return (NULL);
-	while (++i < argc)
-		get_args(rval + i, argv[i]);
-	return (rval);
-}
-
-void	get_args(t_list *cmd, char *argv)
-{
-	char	**tmp;
-	int		i;
-
-	tmp = ft_split(argv, ' ');
-	cmd->name = tmp[0];
-	cmd->args = tmp + 1;
 }
 
 void	rec_fork(int count, char **cmd, char **arg)
