@@ -7,6 +7,7 @@
 # include <stdio.h>
 # include <string.h>
 # include <sys/types.h>
+# include <sys/wait.h>
 
 typedef struct s_node
 {
@@ -14,9 +15,10 @@ typedef struct s_node
 	char			**args;
 } t_node;
 
-t_node	*init_commands(int argc, char **argv);
+void	init_commands(int argc, char **argv, char **envp, t_node **arr);
 void	get_args(t_node *cmd, char *argv);
 char 	**get_path(char **envp);
-void	rec_fork(int count, char **cmd, char **arg);
+void	rec_fork(int count, t_node *arr);
+char	*parsing_path(char **path, char *cmd);
 
 #endif

@@ -1,17 +1,26 @@
 #include "pipex.h"
 
-t_node	*init_commands(int argc, char **argv)
+void	init_commands(int argc, char **argv, char **envp, t_node **arr)
 {
-	t_node	*rval;
-	int	i;
+	int		i;
+	char	**path;
 
 	i = -1;
-	rval = (t_node *)malloc(argc * sizeof(t_node));
-	if (!rval)
-		return (NULL);
+	*arr = (t_node *)malloc(argc * sizeof(t_node));
+	if (!*arr)
+		exit(EXIT_FAILURE);
+	path = get_path(envp);
+	if (!path)
+	{
+		free(*arr);
+		exit(EXIT_FAILURE);
+	}
 	while (++i < argc)
-		get_args(rval + i, argv[i]);
-	return (rval);
+	{
+		get_args(*arr + i, argv[i]);
+		(*arr)[i].name = parsing_path(path, (*arr)[i].name);
+	}
+	free(path);
 }
 
 void	get_args(t_node *cmd, char *argv)
@@ -27,6 +36,7 @@ void	get_args(t_node *cmd, char *argv)
 char **get_path(char **envp)
 {
 	char	**path;
+	char	*tmp;
 	int		i;
 
 	i = 0;
@@ -36,7 +46,11 @@ char **get_path(char **envp)
 	while (path[i])
 	{
 		if (path[i][ft_strlen(path[i]) - 1] != '/')
+		{
+			tmp = path[i];
 			path[i] = ft_strjoin(path[i], "/");
+			free(tmp);
+		}
 		i++;
 	}
 	return (path);
