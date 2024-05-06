@@ -35,30 +35,50 @@ void rec_fork(int count, t_node *arr)
 	pid_t pid;
 	int	status;
 
-	printf("execute %s", arr->name);
 	if (count == -1)
-		return;
+		return ;
 	pipe(pipedes);
 	pid = fork();
-	if (pid == 0)
+	// if (pid == 0)
+	// {
+	// 	rec_fork(count - 1, arr + 1);
+	// 	close(pipedes[0]);
+	// 	close(pipedes[1]);
+	// }
+	if (!pid)
 	{
-		rec_fork(count - 1, arr + 1);
-		// close(pipedes[0]);
+		printf("execute %s\n", arr->name);
 		dup2(pipedes[1], 1);
-		printf("execute %s", arr->name);
 		execve(arr->name, arr->args, NULL);
-		// close(pipedes[1]);
+		// close(pipedes[0]);
+		exit (0);
 	}
-	else if (count)
+	else
 	{
-		waitpid(pid, &status, 0);
-		// wait(NULL);
+		// waitpid(pid, &status, 0);
+		wait(NULL);
+		arr++;
 		char buf[1024];
 		int len;
+		int	pipedes_2[2];
+		//pipe(pipedes_2);
 		// close(pipedes[1]);
-		while ((len = read(pipedes[0], buf, 1024)) != 0)
-			write(1, buf, len);
-		// close(pipedes[0]);
+		 while ((len = read(pipedes[0], buf, 1024)) != 0)
+		 {
+		 	write(pipedes_2[1], buf, len);
+		 }
+		//dup2(pipedes[1], 1);
+		// pid = fork();
+		// if (!pid)
+		// {
+		// 	printf("execute %s\n", arr->name);
+		// 	dup2(pipedes[0], 0);
+		// 	execve(arr->name, arr->args, NULL);
+		// 	// close(pipedes[0]);
+		// 	exit (0);
+		// }
+		//dup2(pipedes[0], 0);
+		//execve(arr->name, arr->args, NULL);
 	}
 	return;
 }
