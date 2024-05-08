@@ -33,7 +33,6 @@ HEADER	=	libft.h
 OBJ		=	$(SRCS:%.c=%.o)
 OBJ_B	=	$(SRCS_B:%.c=%.o)
 
-CC		=	gcc
 CFLAGS	=	-Wall -Wextra -Werror
 
 .PHONY	:	all clean fclean re bonus

@@ -18,7 +18,9 @@ typedef struct s_node
 void	init_commands(int argc, char **argv, char **envp, t_node **arr);
 void	get_args(t_node *cmd, char *argv);
 char 	**get_path(char **envp);
-void	rec_fork(int count, t_node *arr);
 char	*parsing_path(char **path, char *cmd);
+void	test_dup(int count, t_node *arr, char **envp);
+void	validation_args(int argc, char *argv[]);
+/* unit test functions */
 
 #endif

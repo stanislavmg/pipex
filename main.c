@@ -1,84 +1,57 @@
 #include "pipex.h"
+void	validation_args(int argc, char *argv[]);
 
 int main(int argc, char **argv, char **envp)
 {
 	t_node *arr;
-	int pid;
-	int i, j;
 
+	validation_args(argc, argv);
 	init_commands(argc - 1, argv + 1, envp, &arr);
-	i = 0;
-	// while (i < argc - 1)
-	// {
-	// 	printf("name = %s\n", arr[i].name);
-	// 	j = 0;
-	// 	while ((arr[i]).args[j])
-	// 	{
-	// 		printf("%s\n", arr[i].args[j]);
-	// 		j++;
-	// 	}
-	// 	i++;
-	// }
-	// while (*path)
-	// {
-	// 	printf("%s\n", *path);
-	// 	path++;
-	// }
-	// printf("%s\n", parsing_path(path, arr[0].name));
-	rec_fork(argc - 1, arr);
 	return (0);
 }
 
-void rec_fork(int count, t_node *arr)
-{
-	int pipedes[2];
-	pid_t pid;
-	int	status;
-
-	if (count == -1)
-		return ;
-	pipe(pipedes);
-	pid = fork();
-	// if (pid == 0)
-	// {
-	// 	rec_fork(count - 1, arr + 1);
-	// 	close(pipedes[0]);
-	// 	close(pipedes[1]);
-	// }
-	if (!pid)
-	{
-		printf("execute %s\n", arr->name);
-		dup2(pipedes[1], 1);
-		execve(arr->name, arr->args, NULL);
-		// close(pipedes[0]);
-		exit (0);
-	}
-	else
-	{
-		// waitpid(pid, &status, 0);
-		wait(NULL);
-		arr++;
-		char buf[1024];
-		int len;
-		int	pipedes_2[2];
-		//pipe(pipedes_2);
-		// close(pipedes[1]);
-		 while ((len = read(pipedes[0], buf, 1024)) != 0)
-		 {
-		 	write(pipedes_2[1], buf, len);
-		 }
-		//dup2(pipedes[1], 1);
-		// pid = fork();
-		// if (!pid)
-		// {
-		// 	printf("execute %s\n", arr->name);
-		// 	dup2(pipedes[0], 0);
-		// 	execve(arr->name, arr->args, NULL);
-		// 	// close(pipedes[0]);
-		// 	exit (0);
-		// }
-		//dup2(pipedes[0], 0);
-		//execve(arr->name, arr->args, NULL);
-	}
-	return;
-}
+// void	test_dup(int count, t_node *arr, char **envp)
+// {
+// 	int	pdes1[2];
+// 	int	pdes2[2];
+// 	pid_t	pid;
+// 	char	buf[1024];
+// 	int		ch;
+// 	char	*cmd1 = "/usr/bin/ls";
+// 	char	**arg1; char	**arg2;
+// 	char	*cmd2 = "/usr/bin/wc";
+	
+// 	pipe(pdes1);
+// 	pipe(pdes2);
+// 	arg1 = malloc(sizeof(char *) * 3);
+// 	arg1[0] = "ls";
+// 	arg1[1] = "-la";
+// 	arg1[2] = NULL;
+// 	arg2 = malloc(sizeof(char *) * 3);
+// 	arg2[0] = "wc";
+// 	arg2[1] = "-l";
+// 	arg2[2] = NULL;
+// 	pid = fork();
+// 	if (pid == 0)
+// 	{
+// 		close(pdes1[0]);
+// 		close(pdes2[0]);
+// 		close(pdes2[1]);
+// 		dup2(pdes1[1], STDOUT_FILENO);
+// 		execve(cmd1, arg1, envp);
+// 	}
+// 	wait(NULL);
+// 	//write(1, buf, ch);
+// 	//ch = read(pdes1[0], buf, 1024);
+// 	//write(pdes2[1], buf, ch);
+// 	pid = fork();
+// 	if (pid == 0)
+// 	{
+// 		// close(pdes2[1]);
+// 		// close(pdes1[0]);
+// 		// close(pdes1[1]);
+// 		dup2(pdes1[0], STDIN_FILENO);
+// 		execve(cmd2, arg2, envp);
+// 	}
+// 	//waitpid(pid, NULL, 0);
+// }
