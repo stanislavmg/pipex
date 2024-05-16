@@ -1,6 +1,6 @@
 #include "pipex.h"
 
-void	validation_args(int argc, char *argv[])
+void	validation_args(int argc, char **argv)
 {
 	if (argc != 5)
 	{

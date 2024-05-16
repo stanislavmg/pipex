@@ -1,0 +1,17 @@
+Parameter
+
+    filename: name of the file which you want to create
+    mode: indicates permissions of the new file.
+Return Value
+
+    return first unused file descriptor (generally 3 when first creating use in the process because 0, 1, 2 fd are reserved)
+    return -1 when an error
+How C create() works in OS
+    Create a new empty file on the disk.
+    Create file table entry.
+    Set the first unused file descriptor to point to the file table entry.
+    Return file descriptor used, -1 upon failure.
+2. C open
+
+The open() function in C is used to open the file for reading, writing, or both. It is also capable of creating the file if it does not exist. It is defined inside <unistd.h> header file and the flags that are passed as arguments are defined inside <fcntl.h> header file.
+Syntax of open() in C

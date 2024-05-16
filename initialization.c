@@ -25,11 +25,8 @@ void	init_commands(int argc, char **argv, char **envp, t_node **arr)
 
 void	get_args(t_node *cmd, char *argv)
 {
-	char	**tmp;
-
-	tmp = ft_split(argv, ' ');
-	cmd->name = tmp[0];
-	cmd->args = tmp;
+	cmd->args = ft_split(argv, ' ');
+	cmd->name = cmd->args[0];
 }
 
 char **get_path(char **envp)
