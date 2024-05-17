@@ -3,6 +3,7 @@
 # define BUFFER_SIZE 1024
 
 # include "libft/libft.h"
+# include <errno.h>
 # include <fcntl.h>
 # include <unistd.h>
 # include <stdlib.h>
@@ -25,13 +26,12 @@ typedef struct s_pipex
 	t_node	*cmds;
 } t_pipex;
 
-void	init_commands(int argc, char **argv, char **envp, t_node **arr);
-t_pipex	*init_pipex(t_node *arr, int argc, char *argv[]);
-void	get_args(t_node *cmd, char *argv);
+t_node	*init_commands(int argc, char **argv, char **envp);
+t_pipex *init_pipex(t_node *arr, int argc, char **argv);
+t_node	*init_args(char **path, int argc, char **argv);
 char 	**get_path(char **envp);
 char	*parsing_path(char **path, char *cmd);
-void	test_dup(int count, t_node *arr, char **envp);
-void	validation_args(int argc, char *argv[]);
-int	exec_commands(t_pipex *pipex, char **envp);
+void	validation_args(int argc, char **argv);
+void	exec_commands(t_pipex *pipex, char **envp);
 
 #endif
