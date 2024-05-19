@@ -1,8 +1,20 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: sgoremyk <marvin@42.fr>                    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/05/19 11:47:53 by sgoremyk          #+#    #+#              #
+#    Updated: 2024/05/19 11:47:54 by sgoremyk         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 path = pipex
 
 INCLUDE = pipex.h
 
-SRCS = main.c initialization.c validation.c
+SRCS = main.c initialization.c validation.c free.c
 
 OBJ = $(SRCS:%.c=%.o)
 

@@ -1,14 +1,26 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sgoremyk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/19 11:48:07 by sgoremyk          #+#    #+#             */
+/*   Updated: 2024/05/19 11:48:09 by sgoremyk         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "pipex.h"
 
 void	exit_failure(void)
 {
-	perror(strerror(errno));
+	perror("");
 	exit(EXIT_FAILURE);
 }
 
-int main(int argc, char **argv, char **envp)
+int	main(int argc, char **argv, char **envp)
 {
-	t_cmd *arr;
+	t_cmd	*arr;
 
 	if (!envp || !argv)
 		return (-1);
@@ -18,10 +30,10 @@ int main(int argc, char **argv, char **envp)
 	return (0);
 }
 
-int create_child(int *in_pipe, int *out_pipe, t_cmd *cmd, char **envp)
+int	create_child(int *in_pipe, int *out_pipe, t_cmd *cmd, char **envp)
 {
-	pid_t pid;
-	int status;
+	pid_t	pid;
+	int		status;
 
 	pid = fork();
 	if (pid == -1)
@@ -35,7 +47,7 @@ int create_child(int *in_pipe, int *out_pipe, t_cmd *cmd, char **envp)
 		if (dup2(out_pipe[1], STDOUT_FILENO) == -1)
 			exit_failure();
 		execve(cmd->path, cmd->args, envp);
-		perror(strerror(errno));
+		perror(cmd->path);
 		exit(EXIT_FAILURE);
 	}
 	close(in_pipe[0]);
@@ -45,36 +57,49 @@ int create_child(int *in_pipe, int *out_pipe, t_cmd *cmd, char **envp)
 	return (status);
 }
 
-void exec_commands(t_pipex *pipex, char **envp)
+void	exec_commands(t_pipex *pipex, char **envp)
 {
-	int i;
-	int ch;
-	int status;
-	char buf[BUFFER_SIZE];
+	int		i;
+	int		ch;
+	int		status;
+	char	buf[BUFFER_SIZE];
 
 	i = -1;
-	while (0 < (ch = read(pipex->in_file, buf, BUFFER_SIZE)))
+	ch = 0;
+	while (0 < ch)
+	{
+		ch = read(pipex->in_file, buf, BUFFER_SIZE);
 		write(pipex->in_pipe[1], buf, ch);
+	}
 	while (++i < pipex->cmds_num)
 	{
-		status = create_child(pipex->in_pipe, pipex->out_pipe, pipex->cmds + i, envp);
+		status = create_child(pipex->in_pipe,
+				pipex->out_pipe, pipex->cmds + i, envp);
 		if (status)
 		{
-			printf("hello\n");
 			close(pipex->out_pipe[0]);
 			free_pipex(pipex);
 			exit_failure();
 		}
-		pipe(pipex->in_pipe);
-		while ((ch = read(pipex->out_pipe[0], buf, BUFFER_SIZE)) > 0)
-		{
-			if (i + 1 == pipex->cmds_num)
-				write(pipex->out_file, buf, ch);
-			else
-				write(pipex->in_pipe[1], buf, ch);
-		}
-		close(pipex->out_pipe[0]);
-		pipe(pipex->out_pipe);
+		data_flow(pipex, buf, i);
 	}
 	free_pipex(pipex);
+}
+
+void	data_flow(t_pipex *pipex, char *buf, int count)
+{
+	int	ch;
+
+	ch = 0;
+	pipe(pipex->in_pipe);
+	while (ch > 0)
+	{
+		ch = read(pipex->out_pipe[0], buf, BUFFER_SIZE);
+		if (count + 1 == pipex->cmds_num)
+			write(pipex->out_file, buf, ch);
+		else
+			write(pipex->in_pipe[1], buf, ch);
+	}
+	close(pipex->out_pipe[0]);
+	pipe(pipex->out_pipe);
 }
