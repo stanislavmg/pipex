@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME	=	libft.a
+path	=	libft.a
 
 SRCS	=	ft_isalpha.c	ft_strlcpy.c	ft_strtrim.c\
 			ft_isdigit.c	ft_strlen.c		ft_split.c\
@@ -37,10 +37,10 @@ CFLAGS	=	-Wall -Wextra -Werror
 
 .PHONY	:	all clean fclean re bonus
 
-all		:	$(NAME)
+all		:	$(path)
 
-$(NAME)	:	$(OBJ) $(HEADER)
-	ar rcs $(NAME) $?
+$(path)	:	$(OBJ) $(HEADER)
+	ar rcs $(path) $?
 
 %.o		:	%.c $(HEADER)
 	@$(CC) $(FLAGS) -c $< -o $@
@@ -52,6 +52,6 @@ clean	:
 	@rm -f $(OBJ) $(OBJ_B)
 
 fclean	:	clean
-	@rm -f $(OBJ) $(OBJ_B) $(NAME)
+	@rm -f $(OBJ) $(OBJ_B) $(path)
 
 re		:	fclean all

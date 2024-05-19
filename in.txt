@@ -1,6 +1,6 @@
 Parameter
 
-    filename: name of the file which you want to create
+    filepath: path of the file which you want to create
     mode: indicates permissions of the new file.
 Return Value
 
