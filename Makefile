@@ -10,21 +10,25 @@
 #                                                                              #
 # **************************************************************************** #
 
-path = pipex
+NAME = pipex
+
+LIB = libft.a
 
 INCLUDE = pipex.h
 
-SRCS = main.c initialization.c validation.c free.c
+SRCS = main.c initialization.c validation.c free.c utils.c
 
 OBJ = $(SRCS:%.c=%.o)
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
-all		:	$(path)
+all		:	$(NAME)
 
-$(path)	:	$(OBJ) $(INCLUDE)
+$(NAME)	:	$(OBJ) $(INCLUDE) $(LIB)
+	$(CC) $(CFLAGS) $(OBJ) ./libft/libft.a -o $(NAME)
+
+$(LIB)	:
 	$(MAKE) -sC ./libft
-	$(CC) $(CFLAGS) $(OBJ) ./libft/libft.a -o $(path)
 
 %.o		:	%.c $(INCLUDE)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -33,7 +37,7 @@ clean	:
 	$(RM) $(OBJ)
 
 fclean	:	clean
-	$(RM) $(OBJ) $(path)
+	$(RM) $(NAME)
 
 re		:	fclean all
 
