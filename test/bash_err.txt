@@ -1,0 +1,1 @@
+./test.sh: line 22: wc -l: command not found

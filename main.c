@@ -63,11 +63,11 @@ void	exec_commands(t_pipex *pipex, char **envp)
 	char	buf[BUFFER_SIZE];
 
 	i = -1;
-	ch = 0;
+	ch = read(pipex->in_file, buf, BUFFER_SIZE);
 	while (0 < ch)
 	{
-		ch = read(pipex->in_file, buf, BUFFER_SIZE);
 		write(pipex->in_pipe[1], buf, ch);
+		ch = read(pipex->in_file, buf, BUFFER_SIZE);
 	}
 	while (++i < pipex->cmds_num)
 	{
@@ -88,15 +88,15 @@ void	data_flow(t_pipex *pipex, char *buf, int count)
 {
 	int	ch;
 
-	ch = 0;
+	ch = read(pipex->out_pipe[0], buf, BUFFER_SIZE);
 	pipe(pipex->in_pipe);
 	while (ch > 0)
 	{
-		ch = read(pipex->out_pipe[0], buf, BUFFER_SIZE);
 		if (count + 1 == pipex->cmds_num)
 			write(pipex->out_file, buf, ch);
 		else
 			write(pipex->in_pipe[1], buf, ch);
+		ch = read(pipex->out_pipe[0], buf, BUFFER_SIZE);
 	}
 	ft_close(&pipex->out_pipe[0]);
 	pipe(pipex->out_pipe);
