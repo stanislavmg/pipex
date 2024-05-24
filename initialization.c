@@ -33,6 +33,12 @@ t_cmd	*init_args(char **path, int argc, char **argv)
 		exit_failure(NULL);
 	while (++i <= argc)
 	{
+		if (!argv[i] || !argv[i][0])
+		{
+			arr[i].args = NULL;
+			arr[i].path = NULL;
+			continue ;
+		}
 		if (i == argc)
 		{
 			free_arr(path);

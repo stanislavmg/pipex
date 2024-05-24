@@ -14,11 +14,19 @@
 
 void	validation_args(int argc, char **argv)
 {
+	// int	i;
+	
+	// i = 0;
 	if (argc != CMDS_NUM)
 	{
 		perror("Number of arguments not equal 4\n");
 		exit(EXIT_FAILURE);
 	}
+	// while (++i < argc)
+	// {
+	// 	if (!argv[i] || !argv[i][0])
+	// 		exit(EXIT_FAILURE);
+	// }
 	if (access(argv[1], F_OK) || access(argv[1], R_OK))
 	{
 		perror(argv[1]);

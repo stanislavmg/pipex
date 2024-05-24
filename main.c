@@ -63,7 +63,10 @@ void	exec_commands(t_pipex *pipex, char **envp)
 	char	buf[BUFFER_SIZE];
 
 	i = -1;
-	ch = read(pipex->in_file, buf, BUFFER_SIZE);
+	if (pipex->cmds[0].path)
+		ch = read(pipex->in_file, buf, BUFFER_SIZE);
+	else
+		ch = 0;
 	while (0 < ch)
 	{
 		write(pipex->in_pipe[1], buf, ch);
@@ -71,13 +74,15 @@ void	exec_commands(t_pipex *pipex, char **envp)
 	}
 	while (++i < pipex->cmds_num)
 	{
+		if (!pipex->cmds[i].path)
+			continue ;
 		status = create_child(pipex->in_pipe,
 				pipex->out_pipe, pipex->cmds + i, envp);
 		if (status)
 		{
 			ft_close(&pipex->out_pipe[0]);
 			free_pipex(pipex);
-			exit_failure(NULL);
+			exit(EXIT_FAILURE);
 		}
 		data_flow(pipex, buf, i);
 	}
@@ -89,6 +94,7 @@ void	data_flow(t_pipex *pipex, char *buf, int count)
 	int	ch;
 
 	ch = read(pipex->out_pipe[0], buf, BUFFER_SIZE);
+	write(1, buf, ch);
 	pipe(pipex->in_pipe);
 	while (ch > 0)
 	{

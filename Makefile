@@ -20,7 +20,7 @@ SRCS = main.c initialization.c validation.c free.c utils.c
 
 OBJ = $(SRCS:%.c=%.o)
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 all		:	$(NAME)
 
