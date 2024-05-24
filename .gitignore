@@ -1,0 +1,6 @@
+libft.a
+*.o
+in.txt
+out.txt
+pipex
+pipex-tester
