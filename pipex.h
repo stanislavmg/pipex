@@ -13,6 +13,7 @@
 #ifndef PIPEX_H
 # define PIPEX_H
 # define BUFFER_SIZE 1024
+# define CMD_ERR "command not found\n"
 #ifndef CMDS_NUM
 # define CMDS_NUM 4 + 1
 #endif
@@ -56,7 +57,7 @@ void	data_flow(t_pipex *pipex, char *buf, int count);
 void	exec_commands(t_pipex *pipex, char **envp);
 int		create_child(int *pdes1, int *pdes2, t_cmd *cmd, char **envp);
 /* errors handle and free structures*/
-void	exit_failure(char *str);
+void	exit_failure(char *cmd, char *message);
 void	free_pipex(t_pipex *pipex);
 void	free_args(t_cmd *arr, int num);
 void	free_arr(char **arr);

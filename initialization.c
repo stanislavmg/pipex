@@ -18,7 +18,7 @@ t_cmd	*init_commands(int argc, char **argv, char **envp)
 
 	path = get_path(envp);
 	if (!path)
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	return (init_args(path, argc, argv));
 }
 
@@ -30,7 +30,7 @@ t_cmd	*init_args(char **path, int argc, char **argv)
 	i = -1;
 	arr = (t_cmd *)malloc(argc * sizeof(t_cmd));
 	if (!arr)
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	while (++i <= argc)
 	{
 		if (!argv[i] || !argv[i][0])
@@ -48,12 +48,10 @@ t_cmd	*init_args(char **path, int argc, char **argv)
 		if (!arr[i].args || !arr[i].args[0])
 			break ;
 		arr[i].path = parsing_path(path, arr[i].args[0]);
-		if (!arr[i].path)
-			break ;
 	}
 	free_args(arr, i);
 	free_arr(path);
-	exit_failure(NULL);
+	exit_failure(NULL, NULL);
 	return (NULL);
 }
 
@@ -120,17 +118,17 @@ t_pipex	*init_pipex(t_cmd *arr, int argc, char **argv)
 	if (!pipex)
 	{
 		free_args(arr, argc - 3);
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	}
 	pipex->cmds = arr;
 	pipex->cmds_num = argc - 3;
 	pipex->in_file = open(argv[1], O_RDONLY);
 	pipex->out_file = open(argv[argc - 1], O_TRUNC | O_CREAT | O_RDWR, 0644);
 	if (pipex->in_file == -1 || pipex->out_file == -1)
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	if (pipe(pipex->in_pipe) == -1)
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	if (pipe(pipex->out_pipe) == -1)
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	return (pipex);
 }

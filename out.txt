@@ -1,1 +1,14 @@
-      1       3      24
+Makefile
+free.c
+in.txt
+initialization.c
+libft
+main.c
+out.txt
+pipex
+pipex-tester
+pipex.h
+test
+test.c
+utils.c
+validation.c

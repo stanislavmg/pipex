@@ -18,17 +18,17 @@ void free_pipex(t_pipex *pipex)
 
 	i = -1;
 	if (ft_close(&pipex->in_file))
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	if (ft_close(&pipex->out_file))
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	if (ft_close(&pipex->in_pipe[0]))
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	if (ft_close(&pipex->in_pipe[1]))
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	if (ft_close(&pipex->out_pipe[0]))
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	if (ft_close(&pipex->out_pipe[1]))
-		exit_failure(NULL);
+		exit_failure(NULL, NULL);
 	while (++i < pipex->cmds_num)
 	{
 		free(pipex->cmds[i].path);
