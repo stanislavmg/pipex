@@ -61,12 +61,13 @@ char	**get_path(char **envp)
 	char	*tmp;
 	int		i;
 
-	i = -1;
-	while (ft_strncmp("PATH", *envp, 4))
-		envp++;
-	path = ft_split(*envp, ':');
+	i = 0;
+	while (ft_strncmp("PATH", envp[i], 4))
+		i++;
+	path = ft_split(envp[i], ':');
 	if (!path)
 		return (NULL);
+	i = -1;
 	while (path[++i])
 	{
 		if (path[i][ft_strlen(path[i]) - 1] != '/')
@@ -122,13 +123,40 @@ t_pipex	*init_pipex(t_cmd *arr, int argc, char **argv)
 	}
 	pipex->cmds = arr;
 	pipex->cmds_num = argc - 3;
-	pipex->in_file = open(argv[1], O_RDONLY);
-	pipex->out_file = open(argv[argc - 1], O_TRUNC | O_CREAT | O_RDWR, 0644);
-	if (pipex->in_file == -1 || pipex->out_file == -1)
-		exit_failure(NULL, NULL);
+	if (access(argv[1], F_OK) || access(argv[1], R_OK))
+	{
+		perror(argv[1]);
+		pipex->in_file = 0;
+	}
+	else
+		pipex->in_file = open(argv[1], O_RDONLY);
+	if (!access(argv[argc - 1], F_OK) && access(argv[argc - 1], W_OK))
+	{
+		perror(argv[argc - 1]);
+		pipex->out_file = 1;
+	}
+	else
+		pipex->out_file = open(argv[argc - 1], O_TRUNC | O_CREAT | O_RDWR, 0644);
+	if (pipex->in_file == -1)
+	{
+		perror("pipex");
+		pipex->in_file = 0;
+	}
+	if (pipex->out_file == -1)
+	{
+		perror("pipex");
+		pipex->out_file = 1;		
+	}
+	
 	if (pipe(pipex->in_pipe) == -1)
+	{
+		free_pipex(pipex);
 		exit_failure(NULL, NULL);
+	}
 	if (pipe(pipex->out_pipe) == -1)
+	{
+		free_pipex(pipex);
 		exit_failure(NULL, NULL);
+	}
 	return (pipex);
 }

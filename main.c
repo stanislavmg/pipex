@@ -17,13 +17,22 @@ int	main(int argc, char **argv, char **envp)
 	t_cmd	*arr;
 	t_pipex	*pipex;
 
+	arr = NULL;
+	pipex = NULL;
+	if (argc < CMDS_NUM)
+		exit(EXIT_FAILURE);
 	if (!envp || !argv)
 		return (-1);
 	validation_args(argc, argv);
 	arr = init_commands(argc - 3, argv + 2, envp);
+	if (!arr)
+		return (-1);
 	pipex = init_pipex(arr, argc, argv);
 	if (!pipex)
+	{
+		free_args(arr, argc - 3);
 		return (-1);
+	}
 	exec_commands(pipex, envp);
 	return (0);
 }
@@ -39,18 +48,21 @@ int	create_child(int *in_pipe, int *out_pipe, t_cmd *cmd, char **envp)
 	if (pid == 0)
 	{
 		if (ft_close(&in_pipe[1]) == -1 || ft_close(&out_pipe[0]) == -1)
-			exit_failure(NULL, NULL);
+			exit_failure(cmd->args[0], NULL);
 		if (dup2(in_pipe[0], STDIN_FILENO) == -1)
-			exit_failure(NULL, NULL);
+			exit_failure(cmd->args[0], NULL);
 		if (dup2(out_pipe[1], STDOUT_FILENO) == -1)
-			exit_failure(NULL, NULL);
-		execve(cmd->path, cmd->args, envp);
-		exit_failure(cmd->args[0], CMD_ERR);
+			exit_failure(cmd->args[0], NULL);
+		if (cmd->path)
+			execve(cmd->path, cmd->args, envp);
+		else
+			exit_failure(cmd->args[0], CMD_ERR);
+		exit_failure(cmd->args[0], NULL);
 	}
 	ft_close(&in_pipe[0]);
 	ft_close(&in_pipe[1]);
 	ft_close(&out_pipe[1]);
-	wait(&status);
+	waitpid(pid, &status, 0);
 	return (status);
 }
 
@@ -58,7 +70,6 @@ void	exec_commands(t_pipex *pipex, char **envp)
 {
 	int		i;
 	int		ch;
-	int		status;
 	char	buf[BUFFER_SIZE];
 
 	i = -1;
@@ -73,16 +84,7 @@ void	exec_commands(t_pipex *pipex, char **envp)
 	}
 	while (++i < pipex->cmds_num)
 	{
-		// if (!pipex->cmds[i].path)
-		// 	continue ;
-		status = create_child(pipex->in_pipe,
-				pipex->out_pipe, pipex->cmds + i, envp);
-		// if (status)
-		// {
-		// 	ft_close(&pipex->out_pipe[0]);
-		// 	free_pipex(pipex);
-		// 	exit(EXIT_FAILURE);
-		// }
+		create_child(pipex->in_pipe, pipex->out_pipe, pipex->cmds + i, envp);
 		data_flow(pipex, buf, i);
 	}
 	free_pipex(pipex);
