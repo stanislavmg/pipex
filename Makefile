@@ -16,11 +16,11 @@ LIB = libft.a
 
 INCLUDE = pipex.h
 
-SRCS = main.c initialization.c validation.c free.c utils.c
+SRCS = main.c initialization.c utils.c
 
 OBJ = $(SRCS:%.c=%.o)
 
-CFLAGS = -Wall -Wextra -Werror -g
+CFLAGS = -Wall -Wextra -Werror
 
 all		:	$(NAME)
 

@@ -12,7 +12,7 @@
 
 #include "pipex.h"
 
-int	main(int argc, char **argv, char **envp)
+int	tmain(int argc, char **argv, char **envp)
 {
 	t_cmd	*arr;
 	t_pipex	*pipex;
@@ -23,7 +23,6 @@ int	main(int argc, char **argv, char **envp)
 		exit(EXIT_FAILURE);
 	if (!envp || !argv)
 		return (-1);
-	validation_args(argc, argv);
 	arr = init_commands(argc - 3, argv + 2, envp);
 	if (!arr)
 		return (-1);
@@ -34,6 +33,13 @@ int	main(int argc, char **argv, char **envp)
 		return (-1);
 	}
 	exec_commands(pipex, envp);
+	return (0);
+}
+
+int	main(int ac, char **ar, char **en)
+{
+	tmain(ac, ar, en);
+	system("leaks pipex");
 	return (0);
 }
 
@@ -62,7 +68,7 @@ int	create_child(int *in_pipe, int *out_pipe, t_cmd *cmd, char **envp)
 	ft_close(&in_pipe[0]);
 	ft_close(&in_pipe[1]);
 	ft_close(&out_pipe[1]);
-	waitpid(pid, &status, 0);
+	wait(&status);
 	return (status);
 }
 
@@ -73,7 +79,7 @@ void	exec_commands(t_pipex *pipex, char **envp)
 	char	buf[BUFFER_SIZE];
 
 	i = -1;
-	if (pipex->cmds[0].path)
+	if (pipex->cmds[0].path && pipex->in_file)
 		ch = read(pipex->in_file, buf, BUFFER_SIZE);
 	else
 		ch = 0;
@@ -106,4 +112,30 @@ void	data_flow(t_pipex *pipex, char *buf, int count)
 	}
 	ft_close(&pipex->out_pipe[0]);
 	pipe(pipex->out_pipe);
+}
+
+char	*parsing_path(char **path, char *cmd)
+{
+	int		i;
+	char	*cmd_path;
+
+	i = 0;
+	if (!path || !*path || !cmd)
+		return (NULL);
+	cmd_path = (char *)malloc(sizeof(char) * ft_strlen(cmd) + 1);
+	if (!cmd_path)
+		return (NULL);
+	ft_strlcpy(cmd_path, cmd, ft_strlen(cmd));
+	while (path[i])
+	{
+		if (!access(cmd_path, F_OK))
+			return (cmd_path);
+		free(cmd_path);
+		cmd_path = ft_strjoin(path[i], cmd);
+		if (!cmd_path)
+			return (NULL);
+		i++;
+	}
+	free(cmd_path);
+	return (NULL);
 }

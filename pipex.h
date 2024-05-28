@@ -14,9 +14,7 @@
 # define PIPEX_H
 # define BUFFER_SIZE 1024
 # define CMD_ERR "command not found\n"
-#ifndef CMDS_NUM
 # define CMDS_NUM 4
-#endif
 
 # include "libft/libft.h"
 # include <errno.h>
@@ -48,6 +46,7 @@ typedef struct s_pipex
 t_cmd	*init_commands(int argc, char **argv, char **envp);
 t_pipex	*init_pipex(t_cmd *arr, int argc, char **argv);
 t_cmd	*init_args(char **path, int argc, char **argv);
+void	open_files(t_pipex *pipex, int argc, char **argv);
 char	**get_path(char **envp);
 char	*parsing_path(char **path, char *cmd);
 /* execution commands */

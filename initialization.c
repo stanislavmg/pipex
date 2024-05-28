@@ -30,29 +30,14 @@ t_cmd	*init_args(char **path, int argc, char **argv)
 	i = -1;
 	arr = (t_cmd *)malloc(argc * sizeof(t_cmd));
 	if (!arr)
-		exit_failure(NULL, NULL);
-	while (++i <= argc)
+		return (NULL);
+	while (++i < argc)
 	{
-		if (!argv[i] || !argv[i][0])
-		{
-			arr[i].args = NULL;
-			arr[i].path = NULL;
-			continue ;
-		}
-		if (i == argc)
-		{
-			free_arr(path);
-			return (arr);
-		}
 		arr[i].args = ft_split(argv[i], ' ');
-		if (!arr[i].args || !arr[i].args[0])
-			break ;
 		arr[i].path = parsing_path(path, arr[i].args[0]);
 	}
-	free_args(arr, i);
 	free_arr(path);
-	exit_failure(NULL, NULL);
-	return (NULL);
+	return (arr);
 }
 
 char	**get_path(char **envp)
@@ -61,13 +46,12 @@ char	**get_path(char **envp)
 	char	*tmp;
 	int		i;
 
-	i = 0;
-	while (ft_strncmp("PATH", envp[i], 4))
-		i++;
-	path = ft_split(envp[i], ':');
+	i = -1;
+	while (ft_strncmp("PATH", *envp, 4))
+		envp++;
+	path = ft_split(*envp, ':');
 	if (!path)
 		return (NULL);
-	i = -1;
 	while (path[++i])
 	{
 		if (path[i][ft_strlen(path[i]) - 1] != '/')
@@ -85,32 +69,6 @@ char	**get_path(char **envp)
 	return (path);
 }
 
-char	*parsing_path(char **path, char *cmd)
-{
-	int		i;
-	char	*cmd_path;
-
-	i = 0;
-	if (!path || !*path || !cmd)
-		return (NULL);
-	cmd_path = (char *)malloc(sizeof(char) * ft_strlen(cmd) + 1);
-	if (!cmd_path)
-		return (NULL);
-	ft_strlcpy(cmd_path, cmd, ft_strlen(cmd));
-	while (path[i])
-	{
-		if (!access(cmd_path, F_OK))
-			return (cmd_path);
-		free(cmd_path);
-		cmd_path = ft_strjoin(path[i], cmd);
-		if (!cmd_path)
-			return (NULL);
-		i++;
-	}
-	free(cmd_path);
-	return (NULL);
-}
-
 t_pipex	*init_pipex(t_cmd *arr, int argc, char **argv)
 {
 	t_pipex	*pipex;
@@ -123,6 +81,22 @@ t_pipex	*init_pipex(t_cmd *arr, int argc, char **argv)
 	}
 	pipex->cmds = arr;
 	pipex->cmds_num = argc - 3;
+	open_files(pipex, argc, argv);
+	if (pipe(pipex->in_pipe) == -1)
+	{
+		free_pipex(pipex);
+		exit_failure(NULL, NULL);
+	}
+	if (pipe(pipex->out_pipe) == -1)
+	{
+		free_pipex(pipex);
+		exit_failure(NULL, NULL);
+	}
+	return (pipex);
+}
+
+void	open_files(t_pipex *pipex, int argc, char **argv)
+{
 	if (access(argv[1], F_OK) || access(argv[1], R_OK))
 	{
 		perror(argv[1]);
@@ -136,7 +110,8 @@ t_pipex	*init_pipex(t_cmd *arr, int argc, char **argv)
 		pipex->out_file = 1;
 	}
 	else
-		pipex->out_file = open(argv[argc - 1], O_TRUNC | O_CREAT | O_RDWR, 0644);
+		pipex->out_file = open(argv[argc - 1],
+				O_TRUNC | O_CREAT | O_RDWR, 0644);
 	if (pipex->in_file == -1)
 	{
 		perror("pipex");
@@ -145,18 +120,6 @@ t_pipex	*init_pipex(t_cmd *arr, int argc, char **argv)
 	if (pipex->out_file == -1)
 	{
 		perror("pipex");
-		pipex->out_file = 1;		
+		pipex->out_file = 1;
 	}
-	
-	if (pipe(pipex->in_pipe) == -1)
-	{
-		free_pipex(pipex);
-		exit_failure(NULL, NULL);
-	}
-	if (pipe(pipex->out_pipe) == -1)
-	{
-		free_pipex(pipex);
-		exit_failure(NULL, NULL);
-	}
-	return (pipex);
 }
