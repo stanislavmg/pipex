@@ -12,106 +12,88 @@
 
 #include "pipex.h"
 
-int	tmain(int argc, char **argv, char **envp)
+int	main(int argc, char **argv, char **envp)
 {
 	t_cmd	*arr;
-	t_pipex	*pipex;
 
 	arr = NULL;
-	pipex = NULL;
-	if (argc < CMDS_NUM)
+	if (argc != CMDS_NUM || !argv || !envp)
 		exit(EXIT_FAILURE);
-	if (!envp || !argv)
-		return (-1);
 	arr = init_commands(argc - 3, argv + 2, envp);
 	if (!arr)
 		return (-1);
-	pipex = init_pipex(arr, argc, argv);
-	if (!pipex)
-	{
-		free_args(arr, argc - 3);
-		return (-1);
-	}
-	exec_commands(pipex, envp);
+	exec_commands(arr, argv, envp);
+	free_args(arr, 2);
 	return (0);
 }
 
-int	main(int ac, char **ar, char **en)
+int	first_ch(int *pdes, const char *fname, t_cmd *cmd, char **envp)
 {
-	tmain(ac, ar, en);
-	system("leaks pipex");
-	return (0);
-}
+	int	fd;
 
-int	create_child(int *in_pipe, int *out_pipe, t_cmd *cmd, char **envp)
-{
-	pid_t	pid;
-	int		status;
-
-	pid = fork();
-	if (pid == -1)
-		exit_failure(NULL, NULL);
-	if (pid == 0)
-	{
-		if (ft_close(&in_pipe[1]) == -1 || ft_close(&out_pipe[0]) == -1)
-			exit_failure(cmd->args[0], NULL);
-		if (dup2(in_pipe[0], STDIN_FILENO) == -1)
-			exit_failure(cmd->args[0], NULL);
-		if (dup2(out_pipe[1], STDOUT_FILENO) == -1)
-			exit_failure(cmd->args[0], NULL);
-		if (cmd->path)
-			execve(cmd->path, cmd->args, envp);
-		else
-			exit_failure(cmd->args[0], CMD_ERR);
-		exit_failure(cmd->args[0], NULL);
-	}
-	ft_close(&in_pipe[0]);
-	ft_close(&in_pipe[1]);
-	ft_close(&out_pipe[1]);
-	wait(&status);
-	return (status);
-}
-
-void	exec_commands(t_pipex *pipex, char **envp)
-{
-	int		i;
-	int		ch;
-	char	buf[BUFFER_SIZE];
-
-	i = -1;
-	if (pipex->cmds[0].path && pipex->in_file)
-		ch = read(pipex->in_file, buf, BUFFER_SIZE);
+	if (access(fname, F_OK) || access(fname, R_OK))
+		exit_failure(fname, NULL);
 	else
-		ch = 0;
-	while (0 < ch)
-	{
-		write(pipex->in_pipe[1], buf, ch);
-		ch = read(pipex->in_file, buf, BUFFER_SIZE);
-	}
-	while (++i < pipex->cmds_num)
-	{
-		create_child(pipex->in_pipe, pipex->out_pipe, pipex->cmds + i, envp);
-		data_flow(pipex, buf, i);
-	}
-	free_pipex(pipex);
+		fd = open(fname, O_RDONLY);
+	if (fd == -1)
+		exit(EXIT_FAILURE);
+	ft_close(&pdes[0]);
+	if (dup2(fd, STDIN_FILENO) == -1)
+		exit_failure(cmd->args[0], NULL);
+	if (dup2(pdes[1], STDOUT_FILENO) == -1)
+		exit_failure(cmd->args[0], NULL);
+	ft_close(&pdes[1]);
+	if (cmd->path)
+		execve(cmd->path, cmd->args, envp);
+	else
+		exit_failure(cmd->args[0], CMD_ERR);
+	exit_failure(cmd->args[0], NULL);
+	return (1);
 }
 
-void	data_flow(t_pipex *pipex, char *buf, int count)
+int	second_ch(int *pdes, const char *fname, t_cmd *cmd, char **envp)
 {
-	int	ch;
+	int	fd;
 
-	ch = read(pipex->out_pipe[0], buf, BUFFER_SIZE);
-	pipe(pipex->in_pipe);
-	while (ch > 0)
-	{
-		if (count + 1 == pipex->cmds_num)
-			write(pipex->out_file, buf, ch);
-		else
-			write(pipex->in_pipe[1], buf, ch);
-		ch = read(pipex->out_pipe[0], buf, BUFFER_SIZE);
-	}
-	ft_close(&pipex->out_pipe[0]);
-	pipe(pipex->out_pipe);
+	if (!access(fname, F_OK) && access(fname, W_OK))
+		exit_failure(fname, NULL);
+	else
+		fd = open(fname,
+				O_TRUNC | O_CREAT | O_RDWR, 0644);
+	ft_close(&pdes[1]);
+	if (dup2(pdes[0], STDIN_FILENO) == -1)
+		exit_failure(cmd->args[0], NULL);
+	if (dup2(fd, STDOUT_FILENO) == -1)
+		exit_failure(cmd->args[0], NULL);
+	ft_close(&pdes[0]);
+	if (cmd->path)
+		execve(cmd->path, cmd->args, envp);
+	else
+		exit_failure(cmd->args[0], CMD_ERR);
+	exit_failure(cmd->args[0], NULL);
+	return (1);
+}
+
+void	exec_commands(t_cmd *cmds, char **argv, char **envp)
+{
+	pid_t	ps1;
+	pid_t	ps2;
+	int		status;
+	int		pdes[2];
+
+	pipe(pdes);
+	ps1 = fork();
+	if (!ps1)
+		first_ch(pdes, argv[1], cmds, envp);
+	ps2 = fork();
+	if (!ps2)
+		second_ch(pdes, argv[4], ++cmds, envp);
+	if (ps1 == -1 || ps2 == -1)
+		return ;
+	ft_close(&pdes[0]);
+	ft_close(&pdes[1]);
+	waitpid(ps1, &status, 0);
+	waitpid(ps2, &status, 0);
 }
 
 char	*parsing_path(char **path, char *cmd)

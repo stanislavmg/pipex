@@ -17,24 +17,11 @@ void free_pipex(t_pipex *pipex)
 	int i;
 
 	i = -1;
-	if (ft_close(&pipex->in_file))
-		exit_failure(NULL, NULL);
-	if (ft_close(&pipex->out_file))
-		exit_failure(NULL, NULL);
-	if (ft_close(&pipex->in_pipe[0]))
-		exit_failure(NULL, NULL);
-	if (ft_close(&pipex->in_pipe[1]))
-		exit_failure(NULL, NULL);
-	if (ft_close(&pipex->out_pipe[0]))
-		exit_failure(NULL, NULL);
-	if (ft_close(&pipex->out_pipe[1]))
-		exit_failure(NULL, NULL);
 	while (++i < pipex->cmds_num)
 	{
 		free(pipex->cmds[i].path);
 		free_arr(pipex->cmds[i].args);
 	}
-	free(pipex->cmds);
 	free(pipex);
 }
 
@@ -43,7 +30,7 @@ void free_arr(char **arr)
 	int i;
 
 	i = -1;
-	if (!arr || !*arr)
+	if (!arr)
 		return;
 	while (arr[++i])
 		free(arr[i]);
@@ -62,7 +49,6 @@ void free_args(t_cmd *arr, int num)
 		free_arr(arr[i].args);
 		free(arr[i].path);
 	}
-	free_arr(arr[i].args);
 	free(arr);
 }
 
