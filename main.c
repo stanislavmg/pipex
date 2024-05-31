@@ -33,8 +33,11 @@ int	first_ch(int *pdes, const char *fname, t_cmd *cmd, char **envp)
 
 	if (access(fname, F_OK) || access(fname, R_OK))
 		exit_failure(fname, NULL);
-	else
-		fd = open(fname, O_RDONLY);
+	if (!cmd->path && cmd->args[0])
+		exit_failure(cmd->args[0], CMD_ERR);
+	if (!cmd->path[0])
+		exit_failure(cmd->args[0], CMD_ERR);
+	fd = open(fname, O_RDONLY);
 	if (fd == -1)
 		exit(EXIT_FAILURE);
 	ft_close(&pdes[0]);
@@ -45,8 +48,6 @@ int	first_ch(int *pdes, const char *fname, t_cmd *cmd, char **envp)
 	ft_close(&pdes[1]);
 	if (cmd->path)
 		execve(cmd->path, cmd->args, envp);
-	else
-		exit_failure(cmd->args[0], CMD_ERR);
 	exit_failure(cmd->args[0], NULL);
 	return (1);
 }
@@ -57,9 +58,11 @@ int	second_ch(int *pdes, const char *fname, t_cmd *cmd, char **envp)
 
 	if (!access(fname, F_OK) && access(fname, W_OK))
 		exit_failure(fname, NULL);
-	else
-		fd = open(fname,
-				O_TRUNC | O_CREAT | O_RDWR, 0644);
+	if (!cmd->path && cmd->args[0])
+		exit_failure(cmd->args[0], CMD_ERR);
+	if (!cmd->path[0])
+		exit(EXIT_FAILURE);
+	fd = open(fname, O_TRUNC | O_CREAT | O_RDWR, 0644);
 	ft_close(&pdes[1]);
 	if (dup2(pdes[0], STDIN_FILENO) == -1)
 		exit_failure(cmd->args[0], NULL);
@@ -68,8 +71,6 @@ int	second_ch(int *pdes, const char *fname, t_cmd *cmd, char **envp)
 	ft_close(&pdes[0]);
 	if (cmd->path)
 		execve(cmd->path, cmd->args, envp);
-	else
-		exit_failure(cmd->args[0], CMD_ERR);
 	exit_failure(cmd->args[0], NULL);
 	return (1);
 }
