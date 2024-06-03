@@ -34,7 +34,7 @@ then
 else
 	if [ $LEAKS -gt 0 ]
 	then
-		MEMLEAKS="valgrind --leak-check=full --show-leak-kinds=all --undef-value-errors=no --error-exitcode=$VG_ERR --errors-for-leak-kinds=all"
+		MEMLEAKS="valgrind --leak-check=full --show-leak-kinds=all --undef-value-errors=no --error-exitcode=$VG_ERR --errors-for-leak-kinds=all" --log-file=tmp/vlg_${TEST}
 	fi
 fi
 
@@ -49,12 +49,12 @@ function wait_for_timeout()
 
 function run_test() {
 	TEST=$((TEST + 1))
-    ${MEMLEAKS} --log-file=tmp/vlg_${TEST} ${PIPEX} "${IN}" "${1}" "${2}" "${PIPEX_OUT}" 2>> ${PIPEX_ERR}
+    ${MEMLEAKS} ${PIPEX} "${IN}" "${1}" "${2}" "${PIPEX_OUT}" 2>> ${PIPEX_ERR}
 	if [ $? -eq $VG_ERR ]
 	then
 		print_aligned "${TEST}" "./pipex \"$1\" \"$2\"" "[LK]" "${YELLOW}"
 	else
-		rm tmp/vlg_${TEST} && rm tmp/*.core* &> /dev/null
+		rm tmp/vlg_${TEST} &> /dev/null && rm tmp/*.core* &> /dev/null
     fi
     2>> ${BASH_ERR} < ${IN} ${1} 2>> ${BASH_ERR} | ${2} 2>> ${BASH_ERR} > ${BASH_OUT}
 }
@@ -106,8 +106,8 @@ function str_infile(){
 
 # simple test
 printf "${BOLD}\n  SIMPLE TEST\n\n${RESET}"
-first_args=("ls" "cat -e" "wc -l" "wc" "tail")
-second_args=("wc -l" "wc" "grep -fds" "grep" "head" "ls -a")
+first_args=("ls" "cat -e" "wc -l" "pwd" "/bin/cat")
+second_args=("wc -l" "wc" "grep -ee" "/bin/ls" "head" "cat")
 cleanf
 for first_arg in "${first_args[@]}"
 do

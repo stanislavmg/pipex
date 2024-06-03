@@ -108,7 +108,7 @@ char	*parsing_path(char **path, char *cmd)
 	cmd_path = (char *)malloc(sizeof(char) * ft_strlen(cmd) + 1);
 	if (!cmd_path)
 		return (NULL);
-	ft_strlcpy(cmd_path, cmd, ft_strlen(cmd));
+	ft_strlcpy(cmd_path, cmd, ft_strlen(cmd) + 1);
 	while (path[i])
 	{
 		if (!access(cmd_path, F_OK))
